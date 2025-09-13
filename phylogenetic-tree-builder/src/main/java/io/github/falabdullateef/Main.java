@@ -65,7 +65,7 @@ public class Main {
             populateDistanceMatrix(speciesNames, sequences);
             if (showMatrices) {
                 System.out.println("Initial distance matrix:");
-                printDistanceMatrix();
+                MatrixPrinter.printUpperTriangle(distanceMatrix, (a,b)-> MatrixOps.getDistance(distanceMatrix,a,b));
             }
     } else if (choice == 2) { // User chose Distance matrix
             // Initialize maps and tree nodes first
@@ -95,7 +95,7 @@ public class Main {
             scanner.nextLine(); // consume leftover newline once after matrix input
             if (showMatrices) {
                 System.out.println("Initial distance matrix:");
-                printDistanceMatrix();
+                MatrixPrinter.printUpperTriangle(distanceMatrix, (a,b)-> MatrixOps.getDistance(distanceMatrix,a,b));
             }
         } else if (choice == 3) { // Binary presence/absence matrix
             List<String> binaryVectors = new ArrayList<>();
@@ -120,19 +120,19 @@ public class Main {
             populateDistanceMatrixBinary(speciesNames, binaryVectors);
             if (showMatrices) {
                 System.out.println("Initial distance matrix:");
-                printDistanceMatrix();
+                MatrixPrinter.printUpperTriangle(distanceMatrix, (a,b)-> MatrixOps.getDistance(distanceMatrix,a,b));
             }
         }
 
     // Ensure symmetry before clustering (safety)
-    symmetrizeMatrix();
+    MatrixOps.symmetrize(distanceMatrix);
 
     while (distanceMatrix.size() > 1) {
             String[] minPair = findMinPair();
             updateDistanceMatrix(minPair[0], minPair[1]);
         }
 
-        printTree(treeNodes.values().iterator().next(), "", true);
+    TreePrinter.print(treeNodes.values().iterator().next(), "", true);
     // /todo: Re-audit UPGMA clustering logic (average distance calc, tie handling)
     }
 
@@ -205,32 +205,18 @@ public class Main {
 
         if (showMatrices) {
             System.out.println("\nMerged: " + species1 + " + " + species2 + " -> " + newCluster);
-            printDistanceMatrix();
+            MatrixPrinter.printUpperTriangle(distanceMatrix, (a,b)-> MatrixOps.getDistance(distanceMatrix,a,b));
         }
     }
 
-    private static void printTree(TreeNode node, String prefix, boolean isLastChild) {
-        if (node == null) {
-            return;
-        }
-
-        System.out.println(prefix + (isLastChild ? "+-- " : "|-- ") + node.name);
-        String newPrefix = prefix + (isLastChild ? "    " : "|   ");
-
-        if (node.left != null) {
-            printTree(node.left, newPrefix, node.right == null);
-        }
-        if (node.right != null) {
-            printTree(node.right, newPrefix, true);
-        }
-    }
+    // Tree printing moved to TreePrinter
     private static void populateDistanceMatrix(String[] species, List<String> sequences) {
         for (int i = 0; i < species.length; i++) {
             distanceMatrix.put(species[i], new HashMap<>());
             treeNodes.put(species[i], new TreeNode(species[i]));
             clusterSizes.put(species[i], 1);
             for (int j = 0; j < species.length; j++) {
-                double distance = calculatePairwiseDistance(sequences.get(i), sequences.get(j));
+                double distance = DistanceCalculators.hammingDNA(sequences.get(i), sequences.get(j));
                 distanceMatrix.get(species[i]).put(species[j], distance);
             }
             distanceMatrix.get(species[i]).put(species[i], 0.0);
@@ -243,7 +229,7 @@ public class Main {
             treeNodes.put(species[i], new TreeNode(species[i]));
             clusterSizes.put(species[i], 1);
             for (int j = 0; j < species.length; j++) {
-                double distance = calculateBinaryDistance(binaryVectors.get(i), binaryVectors.get(j));
+                double distance = DistanceCalculators.hammingBinary(binaryVectors.get(i), binaryVectors.get(j));
                 distanceMatrix.get(species[i]).put(species[j], distance);
             }
             distanceMatrix.get(species[i]).put(species[i], 0.0);
@@ -251,97 +237,15 @@ public class Main {
     }
 
 
-    private static double calculatePairwiseDistance(String seq1, String seq2) {
-        double distance = 0;
-        for (int i = 0; i < seq1.length(); i++) {
-            if (seq1.charAt(i) != seq2.charAt(i)) {
-                distance++;
-            }
-        }
-        return distance;
-    }
+    // Distance calculations moved to DistanceCalculators
 
-    private static double calculateBinaryDistance(String v1, String v2) {
-        // Simple Hamming distance (could later normalize by length if desired)
-        double dist = 0;
-        for (int i = 0; i < v1.length(); i++) {
-            if (v1.charAt(i) != v2.charAt(i)) dist++;
-        }
-        return dist;
-    }
+    private static double getDistance(String a, String b) { return MatrixOps.getDistance(distanceMatrix, a, b); }
 
-    private static double getDistance(String a, String b) {
-        if (a.equals(b)) return 0.0;
-        Map<String, Double> rowA = distanceMatrix.get(a);
-        if (rowA != null && rowA.containsKey(b)) {
-            return rowA.get(b);
-        }
-        Map<String, Double> rowB = distanceMatrix.get(b);
-        if (rowB != null && rowB.containsKey(a)) {
-            return rowB.get(a);
-        }
-        return Double.POSITIVE_INFINITY; // indicates missing entry
-    }
+    // Symmetrization moved to MatrixOps
 
-    private static void symmetrizeMatrix() {
-        List<String> labels = new ArrayList<>(distanceMatrix.keySet());
-        for (String i : labels) {
-            distanceMatrix.computeIfAbsent(i, k -> new HashMap<>()).put(i, 0.0);
-        }
-        for (String i : labels) {
-            for (String j : labels) {
-                if (i.equals(j)) continue;
-                Double dij = null;
-                Map<String, Double> rowI = distanceMatrix.get(i);
-                if (rowI != null) dij = rowI.get(j);
-                Map<String, Double> rowJ = distanceMatrix.get(j);
-                Double dji = rowJ != null ? rowJ.get(i) : null;
-                if (dij == null && dji != null) {
-                    distanceMatrix.get(i).put(j, dji);
-                } else if (dji == null && dij != null) {
-                    distanceMatrix.get(j).put(i, dij);
-                } else if (dij != null && dji != null && Math.abs(dij - dji) > 1e-9) {
-                    double avg = (dij + dji) / 2.0;
-                    distanceMatrix.get(i).put(j, avg);
-                    distanceMatrix.get(j).put(i, avg);
-                }
-            }
-        }
-    }
-
-    private static void printDistanceMatrix() {
-        // Print only upper triangle (including diagonal) to avoid duplication
-        List<String> labels = new ArrayList<>(distanceMatrix.keySet());
-        Collections.sort(labels);
-        System.out.print("\t");
-        for (String col : labels) {
-            System.out.print(col + "\t");
-        }
-        System.out.println();
-        for (int i = 0; i < labels.size(); i++) {
-            String row = labels.get(i);
-            System.out.print(row + "\t");
-            for (int j = 0; j < labels.size(); j++) {
-                if (j < i) {
-                    System.out.print("\t"); // blank below diagonal
-                } else {
-                    double d = getDistance(row, labels.get(j));
-                    System.out.print(String.format(Locale.US, "%.2f\t", d));
-                }
-            }
-            System.out.println();
-        }
-    }
+    // Distance matrix printing moved to MatrixPrinter
 
 
 
-    private static class TreeNode {
-        String name;
-        TreeNode left;
-        TreeNode right;
-
-        TreeNode(String name) {
-            this.name = name;
-        }
-    }
+    // TreeNode moved to its own file
 }
