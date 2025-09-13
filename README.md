@@ -15,7 +15,11 @@ The program supports UPGMA (size‑weighted) and WPGMA (unweighted) average link
 ### Hamming Distance
 
 For two equal-length sequences $x$ and $y$ of length $L$:
-$$ d*H(x,y) = \sum*{i=1}^{L} [x_i \ne y_i] $$
+
+```math
+d_H(x,y) = \sum_{i=1}^{L} [x_i \ne y_i]
+```
+
 where $[\cdot]$ is 1 if the condition is true, else 0. (See: Hamming distance — Wikipedia.)
 
 ### Cluster Distances (Average Linkage)
@@ -23,24 +27,39 @@ where $[\cdot]$ is 1 if the condition is true, else 0. (See: Hamming distance �
 Let clusters $A$ and $B$ have sizes $|A|, |B|$ and pairwise distances $d(a,b)$ for $a\in A, b\in B$.
 
 The average (mean) inter-cluster distance is:
-$$ d(A,B) = \frac{1}{|A|\,|B|} \sum*{a\in A}\sum*{b\in B} d(a,b). $$
+
+```math
+d(A,B) = \frac{1}{|A|\,|B|} \sum_{a\in A}\sum_{b\in B} d(a,b)
+```
 
 ### UPGMA Update Rule
 
 When merging clusters $A$ and $B$ into $C = A \cup B$, for any other cluster $X$:
-$$ d(C,X) = \frac{|A|\,d(A,X) + |B|\,d(B,X)}{|A| + |B|}. $$
+
+```math
+d(C,X) = \frac{|A|\,d(A,X) + |B|\,d(B,X)}{|A| + |B|}
+```
+
 This produces an ultrametric tree if the original distances are ultrametric (molecular clock assumption). (UPGMA — Wikipedia.)
 
 ### WPGMA Update Rule
 
 Weighted Pair Group Method with Arithmetic Mean (historically "weighted" refers to equal cluster weights):
-$$ d(C,X) = \frac{d(A,X) + d(B,X)}{2}. $$
+
+```math
+d(C,X) = \frac{d(A,X) + d(B,X)}{2}
+```
+
 All clusters contribute equally regardless of size. (WPGMA — Wikipedia.)
 
 ### (Optional) Node Heights / Branch Lengths
 
 If storing heights for UPGMA you can set the height of a new internal node $C$ as:
-$$ h(C) = \frac{d(A,B)}{2}. $$
+
+```math
+h(C) = \frac{d(A,B)}{2}
+```
+
 Then branch length to child $A$ is $h(C) - h(A)$ (with leaves at height 0). Current implementation omits this; adding it would allow Newick export with branch lengths.
 
 ### Complexity
