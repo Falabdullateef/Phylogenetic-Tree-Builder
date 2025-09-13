@@ -1,0 +1,41 @@
+# ---- Build output ----
+/target/
+phylogenetic-tree-builder/target/
+
+# ---- IDE metadata ----
+*.iml
+.idea/
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# ---- OS / tooling ----
+.DS_Store
+Thumbs.db
+
+# ---- Logs / temp ----
+*.log
+hs_err_pid*.log
+replay_pid*.log
+
+# ---- JVM artifacts ----
+*.class
+
+# ---- Packaging ----
+*.jar
+*.war
+*.ear
+
+# ---- Misc ----
+# Local environment / override files
+*.local.properties
+
+# ---- Optional: Uncomment if you add coverage or reports ----
+# coverage/
+# jacoco.exec
+# site/
+
+# Keep README, pom.xml, and source directories tracked
