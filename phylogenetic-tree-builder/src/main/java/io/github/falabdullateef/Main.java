@@ -34,10 +34,21 @@ public class Main {
 
         String[] speciesNames = new String[numOfSpecies];
 
+    System.out.print("Auto-generate species names (a,b,c,...) ? (y/n): ");
+    String autoAns = scanner.nextLine().trim().toLowerCase();
+    boolean autoNames = autoAns.startsWith("y");
+
         // Prompt user to input the name of each species
-        for (int i = 0; i < numOfSpecies; i++) {
-            System.out.print("Enter name for species " + (i + 1) + ": ");
-            speciesNames[i] = scanner.nextLine();
+        if (autoNames) {
+            for (int i = 0; i < numOfSpecies; i++) {
+                speciesNames[i] = generateLabel(i);
+            }
+            System.out.println("Generated species labels: " + String.join(", ", speciesNames));
+        } else {
+            for (int i = 0; i < numOfSpecies; i++) {
+                System.out.print("Enter name for species " + (i + 1) + ": ");
+                speciesNames[i] = scanner.nextLine();
+            }
         }
 
         if (choice == 1) { // User chose DNA sequence
@@ -66,6 +77,7 @@ public class Main {
             if (showMatrices) {
                 System.out.println("Initial distance matrix:");
                 MatrixPrinter.printUpperTriangle(distanceMatrix, (a,b)-> MatrixOps.getDistance(distanceMatrix,a,b));
+                System.out.println("--------");
             }
     } else if (choice == 2) { // User chose Distance matrix
             // Initialize maps and tree nodes first
@@ -96,6 +108,7 @@ public class Main {
             if (showMatrices) {
                 System.out.println("Initial distance matrix:");
                 MatrixPrinter.printUpperTriangle(distanceMatrix, (a,b)-> MatrixOps.getDistance(distanceMatrix,a,b));
+                System.out.println("--------");
             }
         } else if (choice == 3) { // Binary presence/absence matrix
             List<String> binaryVectors = new ArrayList<>();
@@ -121,6 +134,7 @@ public class Main {
             if (showMatrices) {
                 System.out.println("Initial distance matrix:");
                 MatrixPrinter.printUpperTriangle(distanceMatrix, (a,b)-> MatrixOps.getDistance(distanceMatrix,a,b));
+                System.out.println("--------");
             }
         }
 
@@ -209,6 +223,7 @@ public class Main {
         if (showMatrices) {
             System.out.println("\nMerged: " + species1 + " + " + species2 + " -> " + newCluster);
             MatrixPrinter.printUpperTriangle(distanceMatrix, (a,b)-> MatrixOps.getDistance(distanceMatrix,a,b));
+            System.out.println("--------");
         }
     }
 
@@ -243,6 +258,17 @@ public class Main {
     // Distance calculations moved to DistanceCalculators
 
     private static double getDistance(String a, String b) { return MatrixOps.getDistance(distanceMatrix, a, b); }
+
+    // Generate labels: a,b,...,z, aa, ab, ... (base-26 lowercase)
+    private static String generateLabel(int index) {
+        StringBuilder sb = new StringBuilder();
+        do {
+            int r = index % 26;
+            sb.append((char)('a' + r));
+            index = index / 26 - 1; // after first digit, shift
+        } while (index >= 0);
+        return sb.toString();
+    }
 
     // Symmetrization moved to MatrixOps
 
