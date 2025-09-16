@@ -84,13 +84,14 @@ Naïve implementation (no priority queue) performs $O(n^2)$ distance lookups eac
 - Multiple input modalities (sequences, explicit matrix, binary traits)
 - Automatic distance matrix construction for sequence / binary data
 - Choice between UPGMA and WPGMA
-- Optional display of the evolving distance matrix after each merge
-- Simple ASCII tree output
+- Optional display of the evolving distance matrix after each merge (each matrix followed by a separator line `--------` for readability)
+- Auto‑generate species labels (a, b, c, …) if you prefer not to type names
+- Simple ASCII tree output with branch lengths
 - Minimal, dependency‑free core (pure Java)
 
 ## How It Works
 
-1. Collect taxa (species) names.
+1. Collect taxa (species) names (optionally auto‑generate a, b, c, …).
 2. Depending on mode:
    - DNA: read all sequences (validated for equal length) and compute pairwise Hamming distances.
    - Distance matrix: user supplies upper triangle; matrix is symmetrized.
