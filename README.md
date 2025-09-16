@@ -8,7 +8,7 @@ A simple interactive Java (Maven) CLI tool that constructs a phylogenetic cluste
 
 The program supports UPGMA (size‑weighted) and WPGMA (unweighted) average linkage clustering and prints the resulting rooted tree as an ASCII outline.
 
-> NOTE: Branch lengths are not currently printed / stored; internal node labels are simple concatenations like `(A,B)`.
+Branch lengths are now shown: each child line includes a square‑bracketed length `[len]` representing the distance from its parent (UPGMA height difference, WPGMA treated analogously). Internal node labels remain concatenations like `(A,B)`.
 
 ## Background & Mathematics
 
@@ -172,8 +172,7 @@ Initial distance matrix:
 ## Extending
 
 - Add new distance metrics: implement additional static methods in `DistanceCalculators`.
-- Branch lengths: modify `TreeNode` to store heights; compute UPGMA node height = average child distance / 2.
-- Export formats: traverse final tree to output Newick (e.g., `(A,B,(C,D));`).
+- Export formats: traverse final tree to output Newick (e.g., `(A,B,(C,D));`) including branch lengths.
 - Add NJ (Neighbor Joining): integrate a different reduction formula and Q-matrix.
 
 ## Design Notes / Assumptions

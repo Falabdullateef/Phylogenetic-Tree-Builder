@@ -166,6 +166,9 @@ public class Main {
         TreeNode newNode = new TreeNode(newCluster);
         newNode.left = treeNodes.get(species1);
         newNode.right = treeNodes.get(species2);
+        // Height (UPGMA style): half the distance between children. For WPGMA we still show same convention.
+        double dAB = getDistance(species1, species2);
+        newNode.height = dAB / 2.0;
 
         treeNodes.put(newCluster, newNode);
         treeNodes.remove(species1);
