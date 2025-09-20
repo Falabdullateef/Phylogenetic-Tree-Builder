@@ -39,3 +39,7 @@ replay_pid*.log
 # site/
 
 # Keep README, pom.xml, and source directories tracked
+
+# ---- Project-specific ignored artifacts ----
+# Release notes draft (keep out of VCS; paste into GitHub Releases instead)
+release/readme.md
