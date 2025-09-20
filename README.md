@@ -8,7 +8,7 @@ A simple interactive Java (Maven) CLI tool that constructs a phylogenetic cluste
 
 The program supports UPGMA (size‑weighted) and WPGMA (unweighted) average linkage clustering and prints the resulting rooted tree as an ASCII outline.
 
-Branch lengths are now shown: each child line includes a square‑bracketed length `[len]` representing the distance from its parent (UPGMA height difference, WPGMA treated analogously). Internal node labels remain concatenations like `(A,B)`.
+Branch lengths are now shown: each child line includes a square‑bracketed length `[len]` representing the distance from its parent (UPGMA height difference, WPGMA treated analogously). The horizontal connector length is also scaled proportionally to the branch length for better visual intuition. Internal node labels remain concatenations like `(A,B)`.
 
 ## Background & Mathematics
 
@@ -86,7 +86,7 @@ Naïve implementation (no priority queue) performs $O(n^2)$ distance lookups eac
 - Choice between UPGMA and WPGMA
 - Optional display of the evolving distance matrix after each merge (each matrix followed by a separator line `--------` for readability)
 - Auto‑generate species labels (a, b, c, …) if you prefer not to type names
-- Simple ASCII tree output with branch lengths
+- Simple ASCII tree output with branch lengths (connectors scaled proportionally)
 - Minimal, dependency‑free core (pure Java)
 
 ## How It Works
@@ -114,7 +114,7 @@ phylogenetic-tree-builder/
     ├── MatrixOps.java          # Distance lookup + symmetrization
     ├── MatrixPrinter.java      # (Printed during runs if showMatrices=true)
     ├── TreeNode.java           # Simple binary tree node
-    └── TreePrinter.java        # ASCII tree output
+    └── TreePrinter.java        # ASCII tree output (connector width proportional to branch lengths)
 ```
 
 ## Requirements
@@ -187,7 +187,6 @@ Initial distance matrix:
 
 - Normalize DNA / binary distances to [0,1]
 - Support reading FASTA files
-- Show branch lengths proportional to distance
 - Add unit tests for matrix updates
 - Add Neighbor Joining algorithm
 
