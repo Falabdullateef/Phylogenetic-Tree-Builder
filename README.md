@@ -88,6 +88,7 @@ Naïve implementation (no priority queue) performs $O(n^2)$ distance lookups eac
 - Auto‑generate species labels (a, b, c, …) if you prefer not to type names
 - Simple ASCII tree output with branch lengths (connectors scaled proportionally)
 - Minimal, dependency‑free core (pure Java)
+- NEW: Read DNA sequences from FASTA files
 
 ## How It Works
 
@@ -96,6 +97,7 @@ Naïve implementation (no priority queue) performs $O(n^2)$ distance lookups eac
    - DNA: read all sequences (validated for equal length) and compute pairwise Hamming distances.
    - Distance matrix: user supplies upper triangle; matrix is symmetrized.
    - Binary traits: read fixed-length 0/1 patterns and compute Hamming distances.
+   - FASTA: provide a file path; headers become species names (duplicates are auto-disambiguated), sequences must be equal length.
 3. Repeatedly find the closest pair of clusters.
 4. Merge them into a new cluster `(X,Y)` updating distances by either:
    - UPGMA: weighted average by cluster sizes
@@ -144,6 +146,8 @@ Or using the jar (replace the version with your built version):
 java -cp target/phylogenetic-tree-builder-1.0-SNAPSHOT.jar io.github.falabdullateef.Main
 ```
 
+Tip: To use FASTA input, select option 4 when prompted and enter the path to your FASTA file.
+
 ## Example Session (DNA Mode)
 
 ```
@@ -186,7 +190,7 @@ Initial distance matrix:
 ## Potential Improvements
 
 - Normalize DNA / binary distances to [0,1]
-- Support reading FASTA files
+-
 - Add unit tests for matrix updates
 - Add Neighbor Joining algorithm
 
