@@ -1,5 +1,6 @@
 package io.github.falabdullateef;
 
+import java.io.IOException;
 import java.util.*;
 
 public class Main {
@@ -13,45 +14,42 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("What do you have?");
-    System.out.println("1. DNA sequence");
-    System.out.println("2. Distance matrix");
-    System.out.println("3. Binary presence/absence (0/1) characters");
-    System.out.print("Enter your choice (1/2/3): ");
+        System.out.println("1. DNA sequence (manual)");
+        System.out.println("2. Distance matrix");
+        System.out.println("3. Binary presence/absence (0/1) characters");
+        System.out.println("4. DNA FASTA file");
+        System.out.print("Enter your choice (1/2/3/4): ");
         int choice = scanner.nextInt();
         scanner.nextLine();  // Consume newline left-over
 
-    System.out.print("Use UPGMA (size-weighted) or WPGMA (unweighted)? Enter 'u' or 'w': ");
-    String methodAns = scanner.nextLine().trim().toLowerCase();
-    useUPGMA = !methodAns.startsWith("w");
+        System.out.print("Use UPGMA (size-weighted) or WPGMA (unweighted)? Enter 'u' or 'w': ");
+        String methodAns = scanner.nextLine().trim().toLowerCase();
+        useUPGMA = !methodAns.startsWith("w");
 
-    System.out.print("Show distance matrix after each clustering step? (y/n): ");
-    String showAns = scanner.nextLine().trim().toLowerCase();
-    showMatrices = showAns.startsWith("y");
+        System.out.print("Show distance matrix after each clustering step? (y/n): ");
+        String showAns = scanner.nextLine().trim().toLowerCase();
+        showMatrices = showAns.startsWith("y");
 
-        System.out.print("Enter the number of species: ");
-        int numOfSpecies = scanner.nextInt();
-        scanner.nextLine();  // Consume newline left-over
+        if (choice == 1) { // DNA sequences entered manually
+            System.out.print("Enter the number of species: ");
+            int numOfSpecies = scanner.nextInt();
+            scanner.nextLine();
 
-        String[] speciesNames = new String[numOfSpecies];
+            String[] speciesNames = new String[numOfSpecies];
+            System.out.print("Auto-generate species names (a,b,c,...) ? (y/n): ");
+            String autoAns = scanner.nextLine().trim().toLowerCase();
+            boolean autoNames = autoAns.startsWith("y");
 
-    System.out.print("Auto-generate species names (a,b,c,...) ? (y/n): ");
-    String autoAns = scanner.nextLine().trim().toLowerCase();
-    boolean autoNames = autoAns.startsWith("y");
-
-        // Prompt user to input the name of each species
-        if (autoNames) {
-            for (int i = 0; i < numOfSpecies; i++) {
-                speciesNames[i] = generateLabel(i);
+            if (autoNames) {
+                for (int i = 0; i < numOfSpecies; i++) speciesNames[i] = generateLabel(i);
+                System.out.println("Generated species labels: " + String.join(", ", speciesNames));
+            } else {
+                for (int i = 0; i < numOfSpecies; i++) {
+                    System.out.print("Enter name for species " + (i + 1) + ": ");
+                    speciesNames[i] = scanner.nextLine();
+                }
             }
-            System.out.println("Generated species labels: " + String.join(", ", speciesNames));
-        } else {
-            for (int i = 0; i < numOfSpecies; i++) {
-                System.out.print("Enter name for species " + (i + 1) + ": ");
-                speciesNames[i] = scanner.nextLine();
-            }
-        }
 
-        if (choice == 1) { // User chose DNA sequence
             List<String> sequences = new ArrayList<>();
             Integer expectedLen = null;
             for (int i = 0; i < numOfSpecies; i++) {
@@ -79,7 +77,24 @@ public class Main {
                 MatrixPrinter.printUpperTriangle(distanceMatrix, (a,b)-> MatrixOps.getDistance(distanceMatrix,a,b));
                 System.out.println("--------");
             }
-    } else if (choice == 2) { // User chose Distance matrix
+        } else if (choice == 2) { // Distance matrix
+            System.out.print("Enter the number of species: ");
+            int numOfSpecies = scanner.nextInt();
+            scanner.nextLine();
+
+            String[] speciesNames = new String[numOfSpecies];
+            System.out.print("Auto-generate species names (a,b,c,...) ? (y/n): ");
+            String autoAns = scanner.nextLine().trim().toLowerCase();
+            boolean autoNames = autoAns.startsWith("y");
+            if (autoNames) {
+                for (int i = 0; i < numOfSpecies; i++) speciesNames[i] = generateLabel(i);
+                System.out.println("Generated species labels: " + String.join(", ", speciesNames));
+            } else {
+                for (int i = 0; i < numOfSpecies; i++) {
+                    System.out.print("Enter name for species " + (i + 1) + ": ");
+                    speciesNames[i] = scanner.nextLine();
+                }
+            }
             // Initialize maps and tree nodes first
             distanceMatrix.clear();
             treeNodes.clear();
@@ -111,6 +126,23 @@ public class Main {
                 System.out.println("--------");
             }
         } else if (choice == 3) { // Binary presence/absence matrix
+            System.out.print("Enter the number of species: ");
+            int numOfSpecies = scanner.nextInt();
+            scanner.nextLine();
+
+            String[] speciesNames = new String[numOfSpecies];
+            System.out.print("Auto-generate species names (a,b,c,...) ? (y/n): ");
+            String autoAns = scanner.nextLine().trim().toLowerCase();
+            boolean autoNames = autoAns.startsWith("y");
+            if (autoNames) {
+                for (int i = 0; i < numOfSpecies; i++) speciesNames[i] = generateLabel(i);
+                System.out.println("Generated species labels: " + String.join(", ", speciesNames));
+            } else {
+                for (int i = 0; i < numOfSpecies; i++) {
+                    System.out.print("Enter name for species " + (i + 1) + ": ");
+                    speciesNames[i] = scanner.nextLine();
+                }
+            }
             List<String> binaryVectors = new ArrayList<>();
             System.out.print("Enter number of characters (columns) in the binary matrix: ");
             int numChars = scanner.nextInt();
@@ -131,6 +163,40 @@ public class Main {
             treeNodes.clear();
             clusterSizes.clear();
             populateDistanceMatrixBinary(speciesNames, binaryVectors);
+            if (showMatrices) {
+                System.out.println("Initial distance matrix:");
+                MatrixPrinter.printUpperTriangle(distanceMatrix, (a,b)-> MatrixOps.getDistance(distanceMatrix,a,b));
+                System.out.println("--------");
+            }
+        } else if (choice == 4) { // FASTA input
+            System.out.print("Enter path to FASTA file: ");
+            String path = scanner.nextLine().trim();
+            List<FastaReader.Entry> entries;
+            try {
+                entries = FastaReader.parse(path);
+            } catch (IOException io) {
+                System.err.println("Failed to read FASTA: " + io.getMessage());
+                return;
+            }
+            if (entries.isEmpty()) {
+                System.err.println("No sequences found in FASTA file.");
+                return;
+            }
+            try {
+                FastaReader.assertEqualLengths(entries);
+            } catch (IllegalArgumentException iae) {
+                System.err.println(iae.getMessage());
+                return;
+            }
+            Object[] arrays = FastaReader.toArrays(entries);
+            String[] speciesNames = (String[]) arrays[0];
+            @SuppressWarnings("unchecked")
+            List<String> sequences = (List<String>) arrays[1];
+
+            distanceMatrix.clear();
+            treeNodes.clear();
+            clusterSizes.clear();
+            populateDistanceMatrix(speciesNames, sequences);
             if (showMatrices) {
                 System.out.println("Initial distance matrix:");
                 MatrixPrinter.printUpperTriangle(distanceMatrix, (a,b)-> MatrixOps.getDistance(distanceMatrix,a,b));
